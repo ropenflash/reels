@@ -9,15 +9,31 @@ import {
   Linkedin,
   Facebook,
   X as Close,
-  Star,
+  // Star,
   Trash,
-  MessageCircle,
-  Eye,
-  ThumbsUp,
+  // Eye,
+  // ThumbsUp,
 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
-import { Video } from '@/types';
 import clsx from 'clsx';
+
+export interface Video {
+  id: string;
+  title: string;
+  description?: string;
+  thumbnailUrl?: string;
+  s3Url: string;
+  avatar?: string;
+  author?: string;
+  time?: string;
+  duration: string;
+  difficulty?: number; // 1-5
+  category?: string;
+  level:string;
+  // likes:string;
+  // rating:number;
+  // views: number;
+}
 
 interface Props {
   video: Video;
@@ -47,16 +63,16 @@ export default function VideoCard({ video, isPlaying, onPlay, onDelete }: Props)
     }
   }, [isPlaying, hasViewed, video.id]);
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        size={14}
-        className={i < rating ? 'text-yellow-400' : 'text-gray-300'}
-        fill={i < rating ? 'currentColor' : 'none'}
-      />
-    ));
-  };
+  // const renderStars = (rating: number) => {
+  //   return Array.from({ length: 5 }, (_, i) => (
+  //     <Star
+  //       key={i}
+  //       size={14}
+  //       className={i < rating ? 'text-yellow-400' : 'text-gray-300'}
+  //       fill={i < rating ? 'currentColor' : 'none'}
+  //     />
+  //   ));
+  // };
 
   return (
     <Card className="overflow-hidden relative group hover:scale-[1.02] transition-transform shadow-lg rounded-2xl bg-white">
@@ -117,10 +133,10 @@ export default function VideoCard({ video, isPlaying, onPlay, onDelete }: Props)
             {video.level}
           </span>
 
-          <div className="flex items-center gap-1">
+          {/* <div className="flex items-center gap-1">
             <span className="mr-1">Rating:</span>
             {renderStars(video.rating || 0)}
-          </div>
+          </div> */}
         </div>
 
         <div className="flex items-center space-x-2 text-xs text-gray-600">
@@ -132,15 +148,15 @@ export default function VideoCard({ video, isPlaying, onPlay, onDelete }: Props)
         </div>
 
         <div className="mt-2 flex justify-between text-xs text-gray-600">
-          <span className="flex items-center gap-1">
+          {/* <span className="flex items-center gap-1">
             <ThumbsUp size={14} /> {video.likes}
-          </span>
-          <span className="flex items-center gap-1">
+          </span> */}
+          {/* <span className="flex items-center gap-1">
             <MessageCircle size={14} /> {video.comments?.length ?? 0}
-          </span>
-          <span className="flex items-center gap-1">
+          </span> */}
+          {/* <span className="flex items-center gap-1">
             <Eye size={14} /> {video.views}
-          </span>
+          </span> */}
 
           {/* Share */}
           <div className="relative">

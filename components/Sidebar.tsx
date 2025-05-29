@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, Share, Trash, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import clsx from "clsx";
 
 export default function Sidebar() {

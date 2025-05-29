@@ -7,7 +7,22 @@ import UploadVideoForm from "@/components/uploadForm";
 import ConfirmModal from "@/components/ConfirmModel";
 import VideoGrid from "@/components/videos/VideoGrid";
 import VideoTabs from "@/components/videos/VideoTabs";
-import { Video } from "@/types";
+
+export interface Video {
+  id: string;
+  title: string;
+  description?: string;
+  thumbnailUrl?: string;
+  s3Url: string;
+  avatar?: string;
+  author?: string;
+  time?: string;
+  duration: string;
+  difficulty?: number; // 1-5
+  category?: string;
+  level: string;
+}
+
 
 export default function HomePage() {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -49,7 +64,7 @@ export default function HomePage() {
       await fetch(`/api/videos/${confirmDeleteId}`, { method: "DELETE" });
       setVideos((prev) => prev.filter((v) => v.id !== confirmDeleteId));
     } catch (err) {
-      alert("Error deleting video.");
+      console.log("Error deleting video.", err);
     } finally {
       setConfirmDeleteId(null);
     }

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma"; // adjust path as needed
+import { prisma } from "../../../lib/prisma"; // adjust path as needed
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {

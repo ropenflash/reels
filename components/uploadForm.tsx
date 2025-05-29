@@ -49,12 +49,18 @@ export default function UploadVideoForm() {
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>, type: 'video' | 'thumbnail') => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0] || null;
-    type === 'video' ? setVideoFile(file) : setThumbnailFile(file);
+    if(type === 'video') {
+      setVideoFile(file) 
+    } else{ setThumbnailFile(file);
+    }
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>, type: 'video' | 'thumbnail') => {
     const file = e.target.files?.[0] || null;
-    type === 'video' ? setVideoFile(file) : setThumbnailFile(file);
+    if(type === 'video') {
+      setVideoFile(file) 
+    } else{ setThumbnailFile(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -109,9 +115,13 @@ export default function UploadVideoForm() {
         authorName: '',
         authorAvatar: '',
       });
-    } catch (err: any) {
-      console.error(err);
-      setMessage(err.message || 'Upload failed');
+    } catch (err) {
+      if (err instanceof Error) {
+        setMessage(err.message)
+        console.error("Failed to delete video:", err.message);
+      } else {
+        console.error("Failed to delete video:", err);
+      }
     } finally {
       setLoading(false);
     }

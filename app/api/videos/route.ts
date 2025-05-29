@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import {
   S3Client,
   ListObjectsV2Command,
@@ -101,7 +101,6 @@ export async function POST(req: NextRequest) {
       thumbnailUrl,
       authorName,
       authorAvatar,
-      rating, // ✅ include optional rating input
     } = body;
 
     // Validate required fields
