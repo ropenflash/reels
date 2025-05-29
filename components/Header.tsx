@@ -6,14 +6,12 @@ import { useSession, signIn, signOut } from "next-auth/react";
 
 interface HeaderProps {
   onNewVideoClick: () => void;
-  isFormOpen: boolean;
   search: string;
   onSearchChange: (value: string) => void;
 }
 
 export default function Header({
   onNewVideoClick,
-  isFormOpen,
   search,
   onSearchChange,
 }: HeaderProps) {
@@ -34,7 +32,6 @@ export default function Header({
         />
         {session && isUploader && (
           <Button onClick={onNewVideoClick}>
-            {isFormOpen ? "Close Form" : "+ New Video"}
           </Button>
         )}
       </div>

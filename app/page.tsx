@@ -1,12 +1,8 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
-import UploadVideoForm from "@/components/uploadForm";
 import ConfirmModal from "@/components/ConfirmModel";
 import VideoGrid from "@/components/videos/VideoGrid";
-import VideoTabs from "@/components/videos/VideoTabs";
 
 export interface Video {
   id: string;
@@ -28,10 +24,8 @@ export default function HomePage() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [tab, setTab] = useState("video");
-  const [search, setSearch] = useState("");
+  const [search, ] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   // Debounce search input
@@ -70,22 +64,12 @@ export default function HomePage() {
     }
   };
 
+
+
   return (
     <div className="flex h-screen flex-col md:flex-row">
-      <Sidebar />
       <main className="flex-1 bg-gray-100 p-4 md:p-6 overflow-y-auto">
-        <Header
-          onNewVideoClick={() => setShowForm(!showForm)}
-          isFormOpen={showForm}
-          search={search}
-          onSearchChange={setSearch}
-        />
 
-        <div className="mb-4">
-          <VideoTabs value={tab} onChange={setTab} />
-        </div>
-
-        {showForm && <UploadVideoForm />}
 
         <VideoGrid
           videos={videos}

@@ -1,8 +1,12 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Providers } from './Providers';
-import "./globals.css";
+"use client";  // <-- Add this at the very top
 
+import { useState } from "react";
+// import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { Providers } from "./Providers";
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,22 +18,73 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "ropenflash",
-  description: "Jump Rope",
-};
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
-         <Providers>{children}</Providers>
+        <Providers>
+          <div className="flex min-h-screen">
+            {/* Sidebar for desktop */}
+            <aside className="hidden sm:block w-64 bg-white border-r shadow-sm">
+              <Sidebar />
+            </aside>
+
+            {/* Mobile sidebar overlay */}
+            {sidebarOpen && (
+              <>
+                <div
+                  className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                  onClick={() => setSidebarOpen(false)}
+                  aria-hidden="true"
+                />
+                <aside className="fixed inset-y-0 left-0 w-64 bg-white border-r shadow-lg z-50">
+                  <Sidebar />
+                </aside>
+              </>
+            )}
+
+            {/* Main content area */}
+            <div className="flex-1 flex flex-col ml-0 sm:ml-4">
+              {/* Header with toggle button */}
+              <header className="h-16 bg-white border-b shadow-sm pt-4 px-6 flex items-center justify-between">
+                <Header onNewVideoClick={()=>{}} search="" onSearchChange={()=>{}}/>
+
+                {/* Mobile menu button */}
+                <button
+                  className="sm:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-600"
+                  onClick={() => setSidebarOpen(true)}
+                  aria-label="Open sidebar"
+                >
+                  {/* Hamburger icon */}
+                  <svg
+                    className="h-6 w-6 text-gray-700"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                </button>
+              </header>
+
+              {/* Page content */}
+              <main className="flex-1 p-6 overflow-auto">{children}</main>
+            </div>
+          </div>
+        </Providers>
       </body>
     </html>
   );

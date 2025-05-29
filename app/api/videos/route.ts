@@ -1,84 +1,80 @@
 import { NextResponse, NextRequest } from "next/server";
-import {
-  S3Client,
-  ListObjectsV2Command,
-  GetObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { prisma } from "../../lib/prisma"
+import { v2 as cloudinary } from "cloudinary";
+import { prisma } from "../../lib/prisma";
 
-const s3 = new S3Client({
-  region: process.env.AWS_REGION!,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
+
+export interface Video {
+  id: string;
+  title: string;
+  description?: string;
+  thumbnailUrl?: string;
+  s3Url: string;
+  avatar?: string;
+  author?: string;
+  time?: string;
+  duration: string;
+  difficulty?: number; // 1-5
+  category?: string;
+  public_id: string;
+  secure_url: string;
+  created_at: string;
+}
+
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
 
-const getThumbnailUrl = (videoUrl: string) => {
-  const baseUrl = videoUrl.split("?")[0];
-  const fileName = baseUrl.split("/").pop()!;
-  const thumbnailFileName = fileName.replace(/\.(mp4|mov)$/i, ".jpg");
-  return videoUrl.replace(fileName, `thumbnails/${thumbnailFileName}`);
+const getThumbnailUrl = (publicId: string) => {
+  return cloudinary.url(`${publicId}.jpg`, {
+    transformation: [{ width: 400, height: 300, crop: "thumb" }],
+  });
 };
 
 export async function GET() {
   try {
-    const listCommand = new ListObjectsV2Command({
-      Bucket: process.env.AWS_S3_BUCKET!,
-    });
-
-    const listResponse = await s3.send(listCommand);
-    const supportedExtensions = [".mp4", ".mov"];
+    const result = await cloudinary.search
+      .expression("resource_type:video")
+      .sort_by("created_at", "desc")
+      .max_results(30)
+      .execute();
 
     const videos = await Promise.all(
-      (listResponse.Contents || [])
-        .filter(
-          (obj) =>
-            obj.Key &&
-            supportedExtensions.some((ext) => obj.Key!.toLowerCase().endsWith(ext))
-        )
-        .map(async (obj) => {
-          const key = obj.Key!;
-          const signedUrl = await getSignedUrl(
-            s3,
-            new GetObjectCommand({
-              Bucket: process.env.AWS_S3_BUCKET!,
-              Key: key,
-            }),
-            { expiresIn: 3600 }
-          );
+      result.resources.map(async (video: Video) => {
+        const title = video.public_id.split("/").pop()!;
+        const videoUrl = video.secure_url;
+        const thumbnailUrl = getThumbnailUrl(video.public_id);
+        const createdAt = new Date(video.created_at);
 
-          const fileName = key.split("/").pop()!;
-          const title = fileName.replace(/\.(mp4|mov)$/i, "");
-          const createdAt = obj.LastModified || new Date();
+        const existing = await prisma.video.findFirst({
+          where: { title },
+        });
 
-          const existing = await prisma.video.findFirst({
-            where: { title },
+        if (!existing) {
+          await prisma.video.create({
+            data: {
+              title,
+              description: "No description",
+              category: null,
+              level: "Beginner", // default
+              s3Url: videoUrl, // optional: rename this field to `cloudinaryUrl` in your DB schema
+              thumbnailUrl,
+              authorName: "System",
+              authorAvatar: "/avatars/default.png",
+              createdAt,
+            },
           });
+        }
 
-          if (!existing) {
-            await prisma.video.create({
-              data: {
-                title,
-                description: "No description",
-                category: null,
-                level: "Beginner", // default/fallback
-                s3Url: signedUrl,
-                thumbnailUrl: getThumbnailUrl(signedUrl),
-                authorName: "System",
-                authorAvatar: "/avatars/default.png",
-                createdAt: createdAt,
-              },
-            });
-          }
-
-          return {
-            title,
-            s3Url: signedUrl,
-            thumbnailUrl: getThumbnailUrl(signedUrl),
-          };
-        })
+        return {
+          title,
+          s3Url: videoUrl,
+          thumbnailUrl,
+        };
+      })
     );
 
     return NextResponse.json({ success: true, videos });
@@ -97,13 +93,12 @@ export async function POST(req: NextRequest) {
       description,
       category,
       level,
-      s3Url,
+      s3Url, // rename this to cloudinaryUrl if you update your DB schema
       thumbnailUrl,
       authorName,
       authorAvatar,
     } = body;
 
-    // Validate required fields
     if (!title || !level || !s3Url || !authorName) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -117,11 +112,10 @@ export async function POST(req: NextRequest) {
         description,
         category,
         level,
-        s3Url,
+        s3Url, // consider renaming to `cloudinaryUrl`
         thumbnailUrl,
         authorName,
         authorAvatar,
-        // rating: typeof rating === "number" ? rating : 0, // ✅ initialize to 0 if not provided
       },
     });
 
