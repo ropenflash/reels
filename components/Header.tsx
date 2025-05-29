@@ -32,12 +32,13 @@ export default function Header({
         />
         {session && isUploader && (
           <Button onClick={onNewVideoClick}>
+            New Video
           </Button>
         )}
       </div>
 
       {/* Right Section: Avatar + Name + Sign In/Out */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
         {status === "loading" ? null : session ? (
           <>
             {session.user?.image && (

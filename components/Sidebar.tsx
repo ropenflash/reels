@@ -27,19 +27,26 @@ export default function Sidebar() {
         <h1 className="text-2xl font-bold text-blue-500 mb-6">RopeNflash</h1>
         <nav className="space-y-4">
           <div className="font-semibold cursor-pointer">Home</div>
-          {/* <div className="cursor-pointer">My Videos</div>
           <div className="cursor-pointer">
-            <Clock className="inline mr-2" size={16} /> History
+             Jump Rope
           </div>
+          <div className="cursor-pointer">
+            Calisthenics
+            </div>
+          <div className="cursor-pointer">
+           Breaking
+          </div>
+          <div className="cursor-pointer">
+             Watch Later
+          </div>
+          {
+          /* <div className="cursor-pointer">My Videos</div>
+         
           <div className="cursor-pointer">
             <Share className="inline mr-2" size={16} /> Shared Video
           </div>
-          <div className="cursor-pointer">
-            <Clock className="inline mr-2" size={16} /> Watch Later
-          </div>
-          <div className="cursor-pointer">
-            <Trash className="inline mr-2" size={16} /> Trash
-          </div>
+        
+          
           <div className="cursor-pointer">Settings</div>
           <div className="flex justify-between items-center cursor-pointer">
             Teams <span className="bg-blue-500 rounded-full px-2">15</span>

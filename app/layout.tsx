@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./Providers";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
+import { useRouter } from "next/navigation";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,10 +20,17 @@ const geistMono = Geist_Mono({
 });
 
 
+
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router= useRouter()
+
+  const handleClick=()=>{
+    router.push("/upload-video")
+  }
 
   return (
     <html lang="en">
@@ -51,10 +59,10 @@ export default function RootLayout({
             )}
 
             {/* Main content area */}
-            <div className="flex-1 flex flex-col ml-0 sm:ml-4">
+            <div className="flex-1 flex flex-col ml-0 sm:ml-4 sm:mt-4">
               {/* Header with toggle button */}
               <header className="h-16 bg-white border-b shadow-sm pt-4 px-6 flex items-center justify-between">
-                <Header onNewVideoClick={()=>{}} search="" onSearchChange={()=>{}}/>
+                <Header onNewVideoClick={()=>{handleClick()}} search="" onSearchChange={()=>{}}/>
 
                 {/* Mobile menu button */}
                 <button
