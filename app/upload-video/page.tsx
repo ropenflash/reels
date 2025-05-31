@@ -1,5 +1,5 @@
 // app/upload-video/page.tsx
-import UploadForm from "@/components/UploadForm";
+import UploadForm from "../../components/UploadForm";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../utils/authOptions";
 
