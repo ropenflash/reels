@@ -44,8 +44,18 @@ const getThumbnailUrl = (publicId: string) =>
     transformation: [{ width: 400, height: 300, crop: "thumb" }],
   });
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const courseId = searchParams.get("courseId");
+
+    if (!courseId) {
+      return NextResponse.json(
+        { error: "Missing courseId in query parameters" },
+        { status: 400 }
+      );
+    }
+
     const result = await cloudinary.search
       .expression("resource_type:video")
       .sort_by("created_at", "desc")
@@ -76,7 +86,7 @@ export async function GET() {
               authorAvatar: "/avatars/default.png",
               createdAt,
               course: {
-                connect: { id: "your-course-id" },  // <-- Replace with actual course id
+                connect: { id: courseId },
               },
             },
           });
@@ -110,7 +120,7 @@ export async function POST(req: NextRequest) {
       thumbnailUrl = null,
       authorName,
       authorAvatar = null,
-      courseId,  // Receive courseId from client to associate video with course
+      courseId,
     } = body;
 
     if (!title || !level || !s3Url || !authorName || !courseId) {
