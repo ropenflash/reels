@@ -2,37 +2,47 @@ import { NextResponse, NextRequest } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { prisma } from "../../lib/prisma";
 
+export interface VideoResource {
+  asset_id: string;
+  public_id: string;
+  format: string;
+  version: number;
+  resource_type: string;
+  type: string;
+  created_at: string; // ISO date string
+  bytes: number;
+  width: number;
+  height: number;
+  url: string;
+  secure_url: string;
+  duration: number;
+  // add other fields as needed
+}
 
 export interface Video {
   id: string;
   title: string;
-  description?: string;
-  thumbnailUrl?: string;
+  description?: string | null;
+  thumbnailUrl?: string | null;
   s3Url: string;
-  avatar?: string;
-  author?: string;
-  time?: string;
-  duration: string;
-  difficulty?: number; // 1-5
-  category?: string;
-  public_id: string;
-  secure_url: string;
-  created_at: string;
+  authorName?: string | null;
+  authorAvatar?: string | null;
+  createdAt: Date;
+  level?: string | null;
+  category?: string | null;
 }
 
-
-// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
   api_key: process.env.CLOUDINARY_API_KEY!,
   api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
 
-const getThumbnailUrl = (publicId: string) => {
-  return cloudinary.url(`${publicId}.jpg`, {
+const getThumbnailUrl = (publicId: string) =>
+  cloudinary.url(publicId, {
+    format: "jpg",
     transformation: [{ width: 400, height: 300, crop: "thumb" }],
   });
-};
 
 export async function GET() {
   try {
@@ -43,8 +53,8 @@ export async function GET() {
       .execute();
 
     const videos = await Promise.all(
-      result.resources.map(async (video: Video) => {
-        const title = video.public_id.split("/").pop()!;
+      result.resources.map(async (video: VideoResource) => {
+        const title = video.public_id.split("/").pop() || video.public_id;
         const videoUrl = video.secure_url;
         const thumbnailUrl = getThumbnailUrl(video.public_id);
         const createdAt = new Date(video.created_at);
@@ -57,14 +67,17 @@ export async function GET() {
           await prisma.video.create({
             data: {
               title,
-              description: "No description",
+              description: null,
               category: null,
-              level: "Beginner", // default
-              s3Url: videoUrl, // optional: rename this field to `cloudinaryUrl` in your DB schema
+              level: "Beginner",
+              s3Url: videoUrl,
               thumbnailUrl,
               authorName: "System",
               authorAvatar: "/avatars/default.png",
               createdAt,
+              course: {
+                connect: { id: "your-course-id" },  // <-- Replace with actual course id
+              },
             },
           });
         }
@@ -90,16 +103,17 @@ export async function POST(req: NextRequest) {
 
     const {
       title,
-      description,
-      category,
-      level,
-      s3Url, // rename this to cloudinaryUrl if you update your DB schema
-      thumbnailUrl,
+      description = null,
+      category = null,
+      level = null,
+      s3Url,
+      thumbnailUrl = null,
       authorName,
-      authorAvatar,
+      authorAvatar = null,
+      courseId,  // Receive courseId from client to associate video with course
     } = body;
 
-    if (!title || !level || !s3Url || !authorName) {
+    if (!title || !level || !s3Url || !authorName || !courseId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -112,10 +126,14 @@ export async function POST(req: NextRequest) {
         description,
         category,
         level,
-        s3Url, // consider renaming to `cloudinaryUrl`
+        s3Url,
         thumbnailUrl,
         authorName,
         authorAvatar,
+        createdAt: new Date(),
+        course: {
+          connect: { id: courseId },
+        },
       },
     });
 

@@ -1,12 +1,12 @@
-"use client";  // <-- Add this at the very top
+'use client'; // <-- Important for using hooks like useState/useRouter
 
 import { useState } from "react";
-// import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./Providers";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,21 +19,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
-
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const router= useRouter()
+  const router = useRouter();
 
-  const handleClick=()=>{
-    router.push("/upload-video")
-  }
+  const handleClick = () => {
+    router.push("/upload-video");
+  };
 
   return (
     <html lang="en">
+      <head>
+        <Script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
@@ -62,7 +65,11 @@ export default function RootLayout({
             <div className="flex-1 flex flex-col ml-0 sm:ml-4 sm:mt-4">
               {/* Header with toggle button */}
               <header className="h-16 bg-white border-b shadow-sm pt-4 px-6 flex items-center justify-between">
-                <Header onNewVideoClick={()=>{handleClick()}} search="" onSearchChange={()=>{}}/>
+                <Header
+                  onNewVideoClick={handleClick}
+                  search=""
+                  onSearchChange={() => {}}
+                />
 
                 {/* Mobile menu button */}
                 <button
@@ -70,7 +77,6 @@ export default function RootLayout({
                   onClick={() => setSidebarOpen(true)}
                   aria-label="Open sidebar"
                 >
-                  {/* Hamburger icon */}
                   <svg
                     className="h-6 w-6 text-gray-700"
                     xmlns="http://www.w3.org/2000/svg"

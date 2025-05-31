@@ -1,11 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu } from "lucide-react";
 import clsx from "clsx";
+import { useRouter } from "next/navigation";
+import { getSession } from "next-auth/react";
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Get session and extract user role
+    getSession().then((session) => {
+      if (session?.user?.role) {
+        setRole(session.user.role);
+      }
+    });
+  }, []);
+
+  const menuItems = [
+    { label: "Home", path: "/" },
+    { label: "Jump Rope", path: "/jump-rope" },
+    { label: "Calisthenics", path: "/calisthenics" },
+    { label: "Breaking", path: "/coming-soon" },
+    { label: "Watch Later", path: "/coming-soon" },
+    ...(role === "ADMIN"
+      ? [{ label: "Admin Panel", path: "/admin/users", admin: true }]
+      : []),
+  ];
+
+  const handleNavigate = (path: string) => {
+    router.push(path);
+    setOpen(false); // close sidebar on mobile after navigation
+  };
 
   return (
     <>
@@ -13,6 +42,7 @@ export default function Sidebar() {
       <button
         onClick={() => setOpen(!open)}
         className="md:hidden fixed top-4 left-4 z-50 p-2 bg-black text-white rounded"
+        aria-label={open ? "Close menu" : "Open menu"}
       >
         <Menu />
       </button>
@@ -24,33 +54,32 @@ export default function Sidebar() {
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <h1 className="text-2xl font-bold text-blue-500 mb-6">RopeNflash</h1>
-        <nav className="space-y-4">
-          <div className="font-semibold cursor-pointer">Home</div>
-          <div className="cursor-pointer">
-             Jump Rope
-          </div>
-          <div className="cursor-pointer">
-            Calisthenics
+        <h1
+          className="text-2xl font-bold text-blue-500 mb-6 cursor-pointer"
+          onClick={() => handleNavigate("/")}
+        >
+          RopeNflash
+        </h1>
+        <nav className="space-y-4" aria-label="Primary navigation">
+          {menuItems.map(({ label, path, admin }, index) => (
+            <div
+              key={index}
+              onClick={() => handleNavigate(path)}
+              className={clsx(
+                "font-semibold cursor-pointer transition",
+                admin ? "text-yellow-400 hover:text-yellow-300" : "hover:text-blue-400"
+              )}
+              role="link"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  handleNavigate(path);
+                }
+              }}
+            >
+              {label}
             </div>
-          <div className="cursor-pointer">
-           Breaking
-          </div>
-          <div className="cursor-pointer">
-             Watch Later
-          </div>
-          {
-          /* <div className="cursor-pointer">My Videos</div>
-         
-          <div className="cursor-pointer">
-            <Share className="inline mr-2" size={16} /> Shared Video
-          </div>
-        
-          
-          <div className="cursor-pointer">Settings</div>
-          <div className="flex justify-between items-center cursor-pointer">
-            Teams <span className="bg-blue-500 rounded-full px-2">15</span>
-          </div> */}
+          ))}
         </nav>
       </aside>
 
@@ -59,6 +88,7 @@ export default function Sidebar() {
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => setOpen(false)}
+          aria-hidden="true"
         />
       )}
     </>

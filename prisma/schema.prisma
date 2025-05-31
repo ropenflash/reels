@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Video {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   title        String
   description  String?
   category     String?
@@ -17,13 +17,15 @@ model Video {
   thumbnailUrl String?
   authorName   String
   authorAvatar String?
-  likes        Int      @default(0)
-  views        Int      @default(0)
-  rating       Float    @default(0) // ⭐️ New field added here
-  createdAt    DateTime @default(now())
+  likes        Int       @default(0)
+  views        Int       @default(0)
+  rating       Float     @default(0)
+  createdAt    DateTime  @default(now())
   comments     Comment[]
-}
 
+  courseId String
+  course   Course @relation("CourseVideos", fields: [courseId], references: [id])
+}
 
 model Comment {
   id        String   @id @default(uuid())
@@ -35,29 +37,29 @@ model Comment {
 }
 
 model User {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String?  @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
-  role          String   @default("VIEWER")
+  role          String    @default("VIEWER")
   accounts      Account[]
   sessions      Session[]
 }
 
 model Account {
-  id                 String   @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String? 
-  access_token       String? 
-  expires_at         Int?    
-  token_type         String? 
-  scope              String? 
-  id_token           String? 
-  session_state      String? 
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -85,4 +87,25 @@ enum Role {
   ADMIN
   UPLOADER
   VIEWER
+}
+
+model Payment {
+  id                  Int      @id @default(autoincrement())
+  email               String
+  courseId            String
+  razorpay_order_id   String
+  razorpay_payment_id String
+  verified            Boolean  @default(false)
+  createdAt           DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id])
+}
+
+model Course {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  videos      Video[]   @relation("CourseVideos")
+  createdAt   DateTime  @default(now())
+  payments    Payment[]
 }
