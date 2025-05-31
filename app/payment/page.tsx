@@ -91,6 +91,7 @@ export default function PayPage() {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
                 email: session.user?.email,
+                courseId: "3fd7337c-f656-411d-8f3f-5be277f19f4c"
               }),
             });
 
