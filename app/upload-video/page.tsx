@@ -1,7 +1,7 @@
 // app/upload-video/page.tsx
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../utils/authOptions";
-import UploadForm from "../../components/UploadForm";
+// import UploadForm from "../../components/UploadForm";
 
 export default async function UploadVideoPage() {
   const session = await getServerSession(authOptions);
@@ -17,7 +17,7 @@ export default async function UploadVideoPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-8 bg-gray-50">
-      <UploadForm />
+      {/* <UploadForm /> */}
     </main>
   );
 }
