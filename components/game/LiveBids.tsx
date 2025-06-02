@@ -11,7 +11,8 @@ export default function LiveBids() {
   const [bids, setBids] = useState<Bid[]>([]);
 
   useEffect(() => {
-    const ws = new WebSocket('ws://3spt5xfu3j.ap-south-1.awsapprunner.com'); // adjust if needed
+    const ws = new WebSocket('wss://3spt5xfu3j.ap-south-1.awsapprunner.com');
+// adjust if needed
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
